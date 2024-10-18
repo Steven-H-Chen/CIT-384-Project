@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Music Player</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Admin Music Player - Manage Songs</h1>
+
+        <!-- Admin Login Section -->
+        <div id="admin-login" class="login-section">
+            <h2>Admin Login</h2>
+            <input type="password" id="admin-password" placeholder="Enter Admin Password">
+            <button id="login-button">Login</button>
+            <p id="login-message"></p>
+        </div>
+
+        <!-- Video Player Section -->
+        <div class="video-player" id="video-container" style="display: none;">
+            <iframe id="youtube-player" width="560" height="315"
+                src="https://www.youtube.com/embed/videoseries?list=PLv4ZNzR1EWiG1r7W4PjzEO46I32fUbN0a&autoplay=0&loop=1"
+                frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+        </div>
+
+        <!-- Skip Count Display -->
+        <div class="skip-count-section" id="skip-count-section" style="display: none;">
+            <h2>Current Skip Votes</h2>
+            <p id="current-skip-count">Votes to Skip: 0</p>
+            <button id="reset-skip-count">Reset Skip Count</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

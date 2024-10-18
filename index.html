@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music Player - Access Selection</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome to the Music Player</h1>
+        <p>Please select your access level:</p>
+        <button id="admin-access-button">Admin Access</button>
+        <button id="user-access-button">User Access</button>
+    </div>
+
+    <script>
+        document.getElementById('admin-access-button').addEventListener('click', function() {
+            window.location.href = 'admin.html'; // Redirect to admin page
+        });
+
+        document.getElementById('user-access-button').addEventListener('click', function() {
+            window.location.href = 'user.html'; // Redirect to user page
+        });
+    </script>
+</body>
+</html>

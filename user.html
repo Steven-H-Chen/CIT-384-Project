@@ -3,18 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Music Player with Skip Voting</title>
+    <title>User Music Player</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
-        <h1>Music Player - Vote to Skip</h1>
+        <h1>User Music Player - Vote to Skip</h1>
 
-        <!-- Visible YouTube Playlist embedded -->
+        <!-- Video Player Section -->
         <div class="video-player">
             <iframe id="youtube-player" width="560" height="315"
                 src="https://www.youtube.com/embed/videoseries?list=PLv4ZNzR1EWiG1r7W4PjzEO46I32fUbN0a&autoplay=1&loop=1"
-                frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+                frameborder="0" allow="autoplay; encrypted-media" allowfullscreen
+                style="pointer-events: none;"></iframe>
         </div>
 
         <!-- Voting Section -->
@@ -33,4 +34,3 @@
     <script src="script.js"></script>
 </body>
 </html>
-
