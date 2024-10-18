@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music Player with Skip Voting</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Music Player - Vote to Skip</h1>
+
+        <!-- Visible YouTube Playlist embedded -->
+        <div class="video-player">
+            <iframe id="youtube-player" width="560" height="315"
+                src="https://www.youtube.com/embed/videoseries?list=PLv4ZNzR1EWiG1r7W4PjzEO46I32fUbN0a&autoplay=1&loop=1"
+                frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+        </div>
+
+        <!-- Voting Section -->
+        <div class="voting-section">
+            <h2>Vote to Skip This Song</h2>
+            <button id="vote-skip-button" class="vote-btn">Vote to Skip</button>
+            <p id="skip-count">Votes to Skip: 0</p>
+        </div>
+
+        <div class="info">
+            <p>Total listeners: <span id="total-listeners">5</span></p>
+            <p>Majority needed to skip: <span id="majority-needed">3</span></p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
+
