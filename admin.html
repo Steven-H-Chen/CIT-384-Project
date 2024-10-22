@@ -3,36 +3,212 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Music Player</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Admin Page</title>
+    <style>
+        /* General page styling */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        /* Container for the entire page */
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Styling for headings */
+        h2 {
+            color: #007BFF;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #007BFF;
+            padding-bottom: 5px;
+        }
+
+        /* Styling for input fields */
+        input[type="text"], input[type="password"] {
+            width: 90%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        /* Button styling */
+        button {
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        /* Styling for lists */
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        li {
+            padding: 10px;
+            background-color: #f9f9f9;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Styling for buttons inside lists */
+        li button {
+            background-color: #dc3545;
+            color: white;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 3px;
+        }
+
+        li button:hover {
+            background-color: #c82333;
+        }
+
+        /* Skip count styling */
+        #admin-skip-count {
+            margin-top: 20px;
+            background-color: #e9ecef;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        #skip-count {
+            font-weight: bold;
+            font-size: 16px;
+        }
+    </style>
+    <script defer>
+        // Admin login functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('login-button').addEventListener('click', function() {
+                const password = document.getElementById('admin-password').value;
+
+                // Hardcoded password for demonstration
+                const correctPassword = 'password';
+
+                if (password === correctPassword) {
+                    // Hide the login form and show admin controls
+                    document.getElementById('admin-login').style.display = 'none';
+                    document.getElementById('admin-controls').style.display = 'block';
+                    loadAdminData(); // Load admin data on successful login
+                } else {
+                    alert('Invalid password');
+                }
+            });
+
+            // Handle video URL change
+            document.getElementById('change-video-button').addEventListener('click', function() {
+                const videoUrl = document.getElementById('video-url').value;
+                document.getElementById('youtube-player').src = videoUrl;
+            });
+
+            // Reset skip votes
+            document.getElementById('reset-skip-button').addEventListener('click', function() {
+                localStorage.setItem('skipVotes', 0); // Reset the skip votes in localStorage
+                loadAdminData(); // Refresh admin display
+            });
+
+            // Add a new song suggestion
+            document.getElementById('add-suggestion-button').addEventListener('click', function() {
+                const suggestion = document.getElementById('song-suggestion').value;
+                if (suggestion.trim() === "") return; // Prevent empty suggestions
+
+                const suggestionList = document.getElementById('suggestions-list');
+
+                const newItem = document.createElement('li');
+                newItem.innerText = suggestion;
+
+                suggestionList.appendChild(newItem);
+
+                // Save suggestion to localStorage
+                let suggestions = JSON.parse(localStorage.getItem('suggestions')) || [];
+                suggestions.push(suggestion);
+                localStorage.setItem('suggestions', JSON.stringify(suggestions));
+                document.getElementById('song-suggestion').value = ''; // Clear input field
+            });
+
+            // Reset suggestion votes
+            document.getElementById('reset-suggestions-button').addEventListener('click', function() {
+                localStorage.removeItem('suggestions'); // Clear all suggestions in localStorage
+                loadAdminData(); // Refresh admin display
+            });
+
+            // Function to load skip votes and suggestions
+            function loadAdminData() {
+                const skipVotes = localStorage.getItem('skipVotes') || 0; // Get the current skip votes
+                document.getElementById('skip-count').innerText = `Skip Votes: ${skipVotes}`;
+
+                // Load suggestions from localStorage
+                const suggestions = JSON.parse(localStorage.getItem('suggestions')) || [];
+                const suggestionList = document.getElementById('suggestions-list');
+                suggestionList.innerHTML = ''; // Clear the list
+
+                suggestions.forEach(suggestion => {
+                    const listItem = document.createElement('li');
+                    listItem.innerText = suggestion;
+                    suggestionList.appendChild(listItem);
+                });
+            }
+        });
+    </script>
 </head>
 <body>
     <div class="container">
-        <h1>Admin Music Player - Manage Songs</h1>
-
-        <!-- Admin Login Section -->
-        <div id="admin-login" class="login-section">
+        <!-- Admin login form -->
+        <div id="admin-login">
             <h2>Admin Login</h2>
-            <input type="password" id="admin-password" placeholder="Enter Admin Password">
+            <input type="password" id="admin-password" placeholder="Enter Password" required>
             <button id="login-button">Login</button>
-            <p id="login-message"></p>
         </div>
 
-        <!-- Video Player Section -->
-        <div class="video-player" id="video-container" style="display: none;">
-            <iframe id="youtube-player" width="560" height="315"
-                src="https://www.youtube.com/embed/videoseries?list=PLv4ZNzR1EWiG1r7W4PjzEO46I32fUbN0a&autoplay=0&loop=1"
+        <!-- Admin controls (hidden by default, shown after login) -->
+        <div id="admin-controls" style="display:none;">
+            <h2>YouTube Video Management</h2>
+            <input type="text" id="video-url" placeholder="Enter YouTube Video URL" required>
+            <iframe id="youtube-player" width="560" height="315" 
+                src="https://www.youtube.com/embed/videoseries?list=PLv4ZNzR1EWiG1r7W4PjzEO46I32fUbN0a"
                 frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-        </div>
+            <button id="change-video-button">Change Video</button>
 
-        <!-- Skip Count Display -->
-        <div class="skip-count-section" id="skip-count-section" style="display: none;">
-            <h2>Current Skip Votes</h2>
-            <p id="current-skip-count">Votes to Skip: 0</p>
-            <button id="reset-skip-count">Reset Skip Count</button>
+            <h2>Skip Votes and Suggestions</h2>
+            <p id="admin-skip-count">
+                <span id="skip-count">Skip Votes: 0</span>
+                <button id="reset-skip-button">Reset Skip Votes</button>
+            </p>
+
+            <h3>Suggestions</h3>
+            <input type="text" id="song-suggestion" placeholder="Add a song suggestion">
+            <button id="add-suggestion-button">Add Suggestion</button>
+            <ul id="suggestions-list"></ul>
+            <button id="reset-suggestions-button">Reset Suggestions</button>
         </div>
     </div>
-
-    <script src="script.js"></script>
 </body>
 </html>

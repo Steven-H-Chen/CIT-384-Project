@@ -3,34 +3,175 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Music Player</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Music Player - User</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            max-width: 600px;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        button {
+            padding: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        h3 {
+            margin-top: 20px;
+            color: #007bff;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 5px;
+        }
+
+        #suggestions-list {
+            list-style-type: none;
+            padding: 0;
+            margin: 10px 0;
+            max-height: 150px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background: #f9f9f9;
+        }
+
+        #suggestions-list li {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        #suggestions-list li:last-child {
+            border-bottom: none;
+        }
+
+        input[type="text"] {
+            width: 80%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        #add-suggestion-button {
+            background-color: #28a745;
+        }
+
+        #add-suggestion-button:hover {
+            background-color: #218838;
+        }
+    </style>
+    <script>
+        let skipVotes = 0;
+        let suggestions = [];
+
+        // Load initial values from localStorage
+        function loadInitialValues() {
+            skipVotes = localStorage.getItem('skipVotes') ? parseInt(localStorage.getItem('skipVotes')) : 0;
+            document.getElementById('skip-count').innerText = `Skip Votes: ${skipVotes}`;
+
+            suggestions = localStorage.getItem('suggestions') ? JSON.parse(localStorage.getItem('suggestions')) : [];
+            displaySuggestions();
+        }
+
+        // Play the video
+        function playVideo() {
+            const video = document.getElementById('youtube-player');
+            video.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+        }
+
+        // Pause the video
+        function pauseVideo() {
+            const video = document.getElementById('youtube-player');
+            video.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+        }
+
+        // Increment skip votes
+        document.getElementById('skip-button').addEventListener('click', function() {
+            skipVotes++;
+            localStorage.setItem('skipVotes', skipVotes);
+            document.getElementById('skip-count').innerText = `Skip Votes: ${skipVotes}`;
+        });
+
+        // Display suggestions from localStorage
+        function displaySuggestions() {
+            const suggestionList = document.getElementById('suggestions-list');
+            suggestionList.innerHTML = ''; // Clear current list
+
+            suggestions.forEach(suggestion => {
+                const listItem = document.createElement('li');
+                listItem.innerText = suggestion;
+                suggestionList.appendChild(listItem);
+            });
+        }
+
+        // Add a new song suggestion
+        document.getElementById('add-suggestion-button').addEventListener('click', function() {
+            const suggestion = document.getElementById('song-suggestion').value.trim();
+            if (suggestion) {
+                suggestions.push(suggestion);
+                localStorage.setItem('suggestions', JSON.stringify(suggestions));
+                displaySuggestions();
+                document.getElementById('song-suggestion').value = '';
+            }
+        });
+
+        // Listen for localStorage changes (admin reset)
+        window.addEventListener('storage', function(event) {
+            if (event.key === 'skipVotes') {
+                skipVotes = parseInt(event.newValue) || 0;
+                document.getElementById('skip-count').innerText = `Skip Votes: ${skipVotes}`;
+            } else if (event.key === 'suggestions') {
+                suggestions = event.newValue ? JSON.parse(event.newValue) : [];
+                displaySuggestions();
+            }
+        });
+
+        // Load initial values on page load
+        window.onload = loadInitialValues;
+    </script>
 </head>
 <body>
     <div class="container">
-        <h1>User Music Player - Vote to Skip</h1>
-
-        <!-- Video Player Section -->
-        <div class="video-player">
-            <iframe id="youtube-player" width="560" height="315"
-                src="https://www.youtube.com/embed/videoseries?list=PLv4ZNzR1EWiG1r7W4PjzEO46I32fUbN0a&autoplay=1&loop=1"
-                frameborder="0" allow="autoplay; encrypted-media" allowfullscreen
-                style="pointer-events: none;"></iframe>
+        <h1>User Page</h1>
+        <iframe id="youtube-player" width="560" height="315" 
+                src="https://www.youtube.com/embed/videoseries?list=PLv4ZNzR1EWiG1r7W4PjzEO46I32fUbN0a&enablejsapi=1" 
+                frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+        <div>
+            <button id="play-button" onclick="playVideo()">Play</button>
+            <button id="pause-button" onclick="pauseVideo()">Pause</button>
+            <p id="skip-count">Skip Votes: 0</p>
         </div>
-
-        <!-- Voting Section -->
-        <div class="voting-section">
-            <h2>Vote to Skip This Song</h2>
-            <button id="vote-skip-button" class="vote-btn">Vote to Skip</button>
-            <p id="skip-count">Votes to Skip: 0</p>
-        </div>
-
-        <div class="info">
-            <p>Total listeners: <span id="total-listeners">5</span></p>
-            <p>Majority needed to skip: <span id="majority-needed">3</span></p>
+        
+        <div>
+            <h3>Song Suggestions</h3>
+            <input type="text" id="song-suggestion" placeholder="Enter song suggestion" required>
+            <button id="add-suggestion-button">Add Suggestion</button>
+            <ul id="suggestions-list"></ul>
         </div>
     </div>
-
-    <script src="script.js"></script>
 </body>
 </html>
