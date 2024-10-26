@@ -142,13 +142,12 @@
             // Handle video URL change
             document.getElementById('change-video-button').addEventListener('click', function() {
                 const videoUrl = document.getElementById('video-url').value;
+                // Extract video ID from the URL if necessary
                 const videoIdMatch = videoUrl.match(/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
                 if (videoIdMatch) {
                     const videoId = videoIdMatch[1];
                     // Set the iframe to the new video
                     document.getElementById('youtube-player').src = `https://www.youtube.com/embed/${videoId}`;
-                    // Send the new video URL to the user side
-                    window.parent.postMessage({ type: 'changeVideo', videoId: videoId }, '*');
                 } else {
                     alert('Please enter a valid YouTube video URL.');
                 }

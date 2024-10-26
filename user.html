@@ -83,6 +83,26 @@
         #add-suggestion-button:hover {
             background-color: #218838;
         }
+
+        .video-container {
+            position: relative;
+            width: 560px; /* Match the iframe width */
+            height: 315px; /* Match the iframe height */
+        }
+
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0); /* Fully transparent overlay */
+            pointer-events: auto; /* Allow overlay to intercept events */
+        }
+
+        .uninteractable {
+            pointer-events: none; /* Prevent interaction with the iframe */
+        }
     </style>
     <script>
         let skipVotes = 0;
@@ -110,11 +130,11 @@
         }
 
         // Increment skip votes
-        document.getElementById('skip-button').addEventListener('click', function() {
+        function incrementSkipVotes() {
             skipVotes++;
             localStorage.setItem('skipVotes', skipVotes);
             document.getElementById('skip-count').innerText = `Skip Votes: ${skipVotes}`;
-        });
+        }
 
         // Display suggestions from localStorage
         function displaySuggestions() {
@@ -128,15 +148,32 @@
             });
         }
 
-        // Add a new song suggestion
-        document.getElementById('add-suggestion-button').addEventListener('click', function() {
-            const suggestion = document.getElementById('song-suggestion').value.trim();
-            if (suggestion) {
-                suggestions.push(suggestion);
-                localStorage.setItem('suggestions', JSON.stringify(suggestions));
-                displaySuggestions();
-                document.getElementById('song-suggestion').value = '';
+        // Update video based on message from admin
+        window.addEventListener('message', function(event) {
+            if (event.data.type === 'changeVideo') {
+                const videoId = event.data.videoId;
+                const video = document.getElementById('youtube-player');
+                video.src = `https://www.youtube.com/embed/${videoId}`;
             }
+        });
+
+        // Add a new song suggestion
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('add-suggestion-button').addEventListener('click', function() {
+                const suggestion = document.getElementById('song-suggestion').value.trim();
+                if (suggestion) {
+                    suggestions.push(suggestion);
+                    localStorage.setItem('suggestions', JSON.stringify(suggestions));
+                    displaySuggestions();
+                    document.getElementById('song-suggestion').value = '';
+                }
+            });
+
+            // New event listener to increment the skip vote when the vote button is clicked
+            document.getElementById('vote-button').addEventListener('click', incrementSkipVotes);
+
+            // Load initial values on page load
+            loadInitialValues();
         });
 
         // Listen for localStorage changes (admin reset)
@@ -149,21 +186,22 @@
                 displaySuggestions();
             }
         });
-
-        // Load initial values on page load
-        window.onload = loadInitialValues;
     </script>
 </head>
 <body>
     <div class="container">
         <h1>User Page</h1>
-        <iframe id="youtube-player" width="560" height="315" 
-                src="https://www.youtube.com/embed/videoseries?list=PLv4ZNzR1EWiG1r7W4PjzEO46I32fUbN0a&enablejsapi=1" 
-                frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+        <div class="video-container">
+            <iframe id="youtube-player" class="uninteractable" width="560" height="315" 
+                    src="https://www.youtube.com/embed/videoseries?list=PLv4ZNzR1EWiG1r7W4PjzEO46I32fUbN0a&enablejsapi=1" 
+                    frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+            <div class="overlay"></div> <!-- Transparent overlay to capture events -->
+        </div>
         <div>
             <button id="play-button" onclick="playVideo()">Play</button>
             <button id="pause-button" onclick="pauseVideo()">Pause</button>
             <p id="skip-count">Skip Votes: 0</p>
+            <button id="vote-button">Vote to Skip</button> <!-- New Vote button -->
         </div>
         
         <div>
