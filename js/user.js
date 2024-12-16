@@ -1,4 +1,17 @@
 document.addEventListener('DOMContentLoaded', () => {
+    const indexButton = document.getElementById('index-button');
+    const adminButton = document.getElementById('admin-button');
+
+    // Redirect to User page
+    indexButton.addEventListener('click', () => {
+        window.location.href = 'index.html';
+    });
+
+    // Redirect to Admin page
+    adminButton.addEventListener('click', () => {
+        window.location.href = 'admin.html';
+    });
+
     const suggestionList = document.getElementById('suggestion-list');
     const skipButton = document.getElementById('skip-button');
     const skipCountDisplay = document.getElementById('skip-count');

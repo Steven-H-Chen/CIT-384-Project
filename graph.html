@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Page</title>
+    <title>Admin Page with Graphs</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -133,113 +134,19 @@
             border-radius: 5px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
+
+        .graph-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 30px;
+        }
+
+        canvas {
+            width: 80%;
+            height: 400px;
+        }
     </style>
-    <script defer>
-        document.addEventListener('DOMContentLoaded', function() {
-            /*const nav = document.createElement('nav');
-            nav.innerHTML = `
-                <a href="#admin-login">Login</a>
-                <a href="#admin-controls">Controls</a>
-                <a href="#youtube-player">Video</a>
-            `;
-            document.body.insertBefore(nav, document.body.firstChild);*/
-
-            document.getElementById('login-button').addEventListener('click', function() {
-                const password = document.getElementById('admin-password').value;
-                const correctPassword = 'password';
-
-                if (password === correctPassword) {
-                    document.getElementById('admin-login').style.display = 'none';
-                    document.getElementById('admin-controls').style.display = 'block';
-                    loadAdminData();
-                } else {
-                    alert('Invalid password');
-                }
-            });
-
-            document.getElementById('change-video-button').addEventListener('click', function() {
-                const videoUrl = document.getElementById('video-url').value;
-                const videoIdMatch = videoUrl.match(/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
-                if (videoIdMatch) {
-                    const videoId = videoIdMatch[1];
-                    document.getElementById('youtube-player').src = `https://www.youtube.com/embed/${videoId}`;
-                    window.parent.postMessage({ type: 'changeVideo', videoId: videoId }, '*');
-                } else {
-                    alert('Please enter a valid YouTube video URL.');
-                }
-            });
-
-            document.getElementById('reset-skip-button').addEventListener('click', function() {
-                localStorage.setItem('skipVotes', 0);
-                loadAdminData();
-            });
-
-            document.getElementById('add-suggestion-button').addEventListener('click', function() {
-                const suggestion = document.getElementById('song-suggestion').value;
-                if (suggestion.trim() === "") return;
-
-                const suggestionList = document.getElementById('suggestions-list');
-
-                const newItem = document.createElement('li');
-
-                const urlPattern = new RegExp(
-                    '^(https?:\/\/)?' +
-                    '((([a-z\d]([a-z\d-]*[a-z\d])*)\.)+[a-z]{2,}|' +
-                    '((\d{1,3}\.){3}\d{1,3}))' +
-                    '(\:\d+)?(\/[-a-z\d%_.~+]*)*' +
-                    '(\?[;&a-z\d%_.~+=-]*)?' +
-                    '(\#[-a-z\d_]*)?$','i'
-                );
-
-                if (urlPattern.test(suggestion)) {
-                    const link = document.createElement('a');
-                    link.href = suggestion;
-                    link.innerText = suggestion;
-                    link.target = '_blank';
-                    newItem.appendChild(link);
-                } else {
-                    newItem.innerText = suggestion;
-                }
-
-                suggestionList.appendChild(newItem);
-
-                let suggestions = JSON.parse(localStorage.getItem('suggestions')) || [];
-                suggestions.push(suggestion);
-                localStorage.setItem('suggestions', JSON.stringify(suggestions));
-                document.getElementById('song-suggestion').value = '';
-            });
-
-            document.getElementById('reset-suggestions-button').addEventListener('click', function() {
-                localStorage.removeItem('suggestions');
-                loadAdminData();
-            });
-
-            function loadAdminData() {
-                const skipVotes = localStorage.getItem('skipVotes') || 0;
-                document.getElementById('skip-count').innerText = `Skip Votes: ${skipVotes}`;
-
-                const suggestions = JSON.parse(localStorage.getItem('suggestions')) || [];
-                const suggestionList = document.getElementById('suggestions-list');
-                suggestionList.innerHTML = '';
-
-                suggestions.forEach(suggestion => {
-                    const listItem = document.createElement('li');
-
-                    if (urlPattern.test(suggestion)) {
-                        const link = document.createElement('a');
-                        link.href = suggestion;
-                        link.innerText = suggestion;
-                        link.target = '_blank';
-                        listItem.appendChild(link);
-                    } else {
-                        listItem.innerText = suggestion;
-                    }
-
-                    suggestionList.appendChild(listItem);
-                });
-            }
-        });
-    </script>
 </head>
 <body>
     <div class="container">
@@ -269,7 +176,133 @@
             <button id="add-suggestion-button">Add Suggestion</button>
             <ul id="suggestions-list"></ul>
             <button id="reset-suggestions-button">Reset Suggestions</button>
+
+            <!-- Graphs Section -->
+            <div class="graph-container">
+                <h2>Skip Votes Graph</h2>
+                <canvas id="skipVotesGraph"></canvas>
+
+                <h2>Song Suggestions Graph</h2>
+                <canvas id="suggestionsGraph"></canvas>
+            </div>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('login-button').addEventListener('click', function() {
+                const password = document.getElementById('admin-password').value;
+                const correctPassword = 'password';
+
+                if (password === correctPassword) {
+                    document.getElementById('admin-login').style.display = 'none';
+                    document.getElementById('admin-controls').style.display = 'block';
+                    loadAdminData();
+                } else {
+                    alert('Invalid password');
+                }
+            });
+
+            // Chart.js Data and Graphs
+            const skipVotesGraph = document.getElementById('skipVotesGraph').getContext('2d');
+            const suggestionsGraph = document.getElementById('suggestionsGraph').getContext('2d');
+
+            const skipVotesChart = new Chart(skipVotesGraph, {
+                type: 'bar',
+                data: {
+                    labels: ['Skip Votes'],
+                    datasets: [{
+                        label: 'Skip Votes',
+                        data: [localStorage.getItem('skipVotes') || 0],
+                        backgroundColor: 'rgba(0, 123, 255, 0.5)',
+                        borderColor: 'rgba(0, 123, 255, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            const suggestionsChart = new Chart(suggestionsGraph, {
+                type: 'bar',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Suggestions Count',
+                        data: [],
+                        backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            // Handle Suggestion addition and update the graph
+            document.getElementById('add-suggestion-button').addEventListener('click', function() {
+                const suggestion = document.getElementById('song-suggestion').value;
+                if (suggestion.trim() === "") return;
+
+                let suggestions = JSON.parse(localStorage.getItem('suggestions')) || [];
+                suggestions.push(suggestion);
+                localStorage.setItem('suggestions', JSON.stringify(suggestions));
+
+                document.getElementById('song-suggestion').value = '';
+                updateSuggestionsGraph();
+            });
+
+            // Reset Skip Votes and Suggestions
+            document.getElementById('reset-skip-button').addEventListener('click', function() {
+                localStorage.setItem('skipVotes', 0);
+                loadAdminData();
+            });
+
+            document.getElementById('reset-suggestions-button').addEventListener('click', function() {
+                localStorage.removeItem('suggestions');
+                loadAdminData();
+            });
+
+            function loadAdminData() {
+                const skipVotes = localStorage.getItem('skipVotes') || 0;
+                document.getElementById('skip-count').innerText = `Skip Votes: ${skipVotes}`;
+
+                // Update Graphs
+                skipVotesChart.data.datasets[0].data = [skipVotes];
+                skipVotesChart.update();
+
+                updateSuggestionsGraph();
+            }
+
+            function updateSuggestionsGraph() {
+                const suggestions = JSON.parse(localStorage.getItem('suggestions')) || [];
+                const suggestionCounts = {};
+
+                // Count the occurrences of each suggestion
+                suggestions.forEach(suggestion => {
+                    suggestionCounts[suggestion] = (suggestionCounts[suggestion] || 0) + 1;
+                });
+
+                const labels = Object.keys(suggestionCounts);
+                const data = labels.map(label => suggestionCounts[label]);
+
+                suggestionsChart.data.labels = labels;
+                suggestionsChart.data.datasets[0].data = data;
+                suggestionsChart.update();
+            }
+        });
+    </script>
 </body>
 </html>
