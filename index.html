@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Music Player - Index</title>
+    <title>Party Music Contoller - Index</title>
     <link rel="stylesheet" href="css/index.css">
+    <link rel="icon" href="party.png" type="image/png">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -14,6 +15,11 @@
             padding: 0;
             display: flex;
             overflow: hidden;
+            background-image: url('party.png');
+            background-size: cover; /* Cover the entire screen */
+            background-repeat: no-repeat; /* Prevent tiling */
+            background-attachment: fixed; /* Fixed background when scrolling */
+            background-position: center center; /* Center the image */
         }
 
         .container {
@@ -48,7 +54,7 @@
         <p>Choose your access:</p>
         <button id="user-button">Enter as User</button>
         <button id="admin-button">Enter as Admin</button>
-        <button id="graph-button">Graph Page</button>
+        <button id="graph-button">Admin Page (Beta)</button>
     </div>
 
     <script src="js/index.js"></script>
